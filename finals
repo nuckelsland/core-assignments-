@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elsa — ELA Final Review</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+    margin: 0;
+    padding: 20px;
+    color: #1a2733;
+    line-height: 1.5;
+  }
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+  .header {
+    background: linear-gradient(135deg, #1f4e79 0%, #2e75b6 100%);
+    color: white;
+    padding: 32px 28px;
+    text-align: center;
+  }
+  .header h1 { margin: 0 0 6px 0; font-size: 28px; font-weight: 700; }
+  .header .subtitle { font-size: 16px; opacity: 0.95; font-weight: 400; }
+  .header .core-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    margin-top: 12px;
+    letter-spacing: 0.5px;
+  }
+  .progress-bar {
+    background: #e6ebf0;
+    height: 8px;
+    width: 100%;
+    overflow: hidden;
+  }
+  .progress-fill {
+    background: linear-gradient(90deg, #2e75b6, #5b9bd5);
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+  .content { padding: 28px; }
+  .section {
+    margin-bottom: 36px;
+  }
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1f4e79;
+    border-bottom: 3px solid #2e75b6;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+  }
+  .section-instructions {
+    font-style: italic;
+    color: #4a5a6a;
+    margin-bottom: 18px;
+    font-size: 15px;
+  }
+  .question-card {
+    background: #f7f9fc;
+    border: 1px solid #e1e7ee;
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    transition: all 0.2s;
+  }
+  .question-number {
+    display: inline-block;
+    background: #2e75b6;
+    color: white;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    text-align: center;
+    line-height: 28px;
+    font-weight: 700;
+    font-size: 14px;
+    margin-right: 10px;
+  }
+  .question-text {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .choices { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+  .choice {
+    background: white;
+    border: 2px solid #d9e2ec;
+    border-radius: 8px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 15px;
+    text-align: left;
+    font-family: inherit;
+    color: #1a2733;
+  }
+  .choice:hover { border-color: #2e75b6; background: #f0f7fc; }
+  .choice.selected { border-color: #2e75b6; background: #e8f1f9; font-weight: 600; }
+  .choice.correct { border-color: #2d7a3e; background: #e8f5ec; color: #1a4d28; }
+  .choice.incorrect { border-color: #c43e3e; background: #fbeaea; color: #6a1f1f; }
+  .feedback {
+    margin-top: 10px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct { background: #d4edda; color: #155724; border-left: 4px solid #2d7a3e; }
+  .feedback.incorrect { background: #f8d7da; color: #721c24; border-left: 4px solid #c43e3e; }
+
+  .match-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 14px;
+  }
+  .match-col h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: #4a5a6a;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .match-item {
+    background: white;
+    border: 2px solid #d9e2ec;
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 15px;
+  }
+  .match-item:hover { border-color: #2e75b6; }
+  .match-item.selected {
+    border-color: #f59e0b;
+    background: #fef3c7;
+    font-weight: 600;
+  }
+  .match-item.matched { opacity: 0.65; cursor: default; }
+  .match-item[data-pair-color="0"].matched { border-color: #4f8ec7; background: #dbeafe; opacity: 1; }
+  .match-item[data-pair-color="1"].matched { border-color: #7c9c4f; background: #e0eccd; opacity: 1; }
+  .match-item[data-pair-color="2"].matched { border-color: #c47a4f; background: #f4d8c5; opacity: 1; }
+  .match-item[data-pair-color="3"].matched { border-color: #9b5fc4; background: #e9d8f4; opacity: 1; }
+  .match-item.correct { border-color: #2d7a3e !important; background: #d4edda !important; }
+  .match-item.incorrect { border-color: #c43e3e !important; background: #f8d7da !important; }
+
+  .reflection-textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 14px;
+    border: 2px solid #d9e2ec;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 15px;
+    resize: vertical;
+    transition: border-color 0.15s;
+  }
+  .reflection-textarea:focus { outline: none; border-color: #2e75b6; }
+
+  .submit-btn {
+    background: linear-gradient(135deg, #1f4e79, #2e75b6);
+    color: white;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: transform 0.1s;
+  }
+  .submit-btn:hover { transform: translateY(-1px); }
+  .submit-btn:disabled { background: #9aa6b0; cursor: not-allowed; transform: none; }
+
+  .results-banner {
+    display: none;
+    background: linear-gradient(135deg, #1f4e79, #2e75b6);
+    color: white;
+    padding: 24px;
+    border-radius: 12px;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .results-banner.show { display: block; }
+  .results-banner .score { font-size: 48px; font-weight: 800; margin: 8px 0; }
+  .results-banner .score-detail { font-size: 16px; opacity: 0.95; }
+
+  .reset-btn {
+    background: white;
+    color: #1f4e79;
+    border: 2px solid white;
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 14px;
+  }
+
+  .footer {
+    text-align: center;
+    padding: 20px;
+    color: #6a7a8a;
+    font-size: 13px;
+    border-top: 1px solid #e1e7ee;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Elsa — ELA Final Review</h1>
+    <div class="subtitle">2nd Semester · Poetry, Persuasive Writing &amp; Personal Narrative</div>
+    <div class="core-tag">CORE Program · Do Right · Be Real · Stay Ready</div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+  <div class="content">
+    <div class="results-banner" id="resultsBanner">
+      <div>You finished!</div>
+      <div class="score" id="scoreDisplay">0 / 15</div>
+      <div class="score-detail" id="scoreDetail"></div>
+      <button class="reset-btn" onclick="resetAll()">Try Again</button>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Section A: Multiple Choice</div>
+      <div class="section-instructions">Tap the best answer. You'll see right away if you got it.</div>
+      <div id="mcContainer"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Section B: Matching</div>
+      <div class="section-instructions" id="matchInstructions"></div>
+      <div class="match-grid">
+        <div class="match-col">
+          <h4>Term</h4>
+          <div id="termsCol"></div>
+        </div>
+        <div class="match-col">
+          <h4>Definition</h4>
+          <div id="defsCol"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Section C: Reflection</div>
+      <div class="section-instructions" id="reflectPrompt"></div>
+      <textarea class="reflection-textarea" id="reflectionInput" placeholder=""></textarea>
+    </div>
+
+    <div style="text-align: center;">
+      <button class="submit-btn" id="submitBtn" onclick="submitAll()">Submit Final Review</button>
+    </div>
+  </div>
+
+  <div class="footer">McLain High School · CORE Program · Ms. Nuckels</div>
+</div>
+
+<script>
+const DATA = {"mc":[{"q":"A poem is a kind of:","choices":["Story","Writing with rhythm and feeling","Math problem","Drawing"],"answer":1},{"q":"To \"persuade\" means to:","choices":["Tell a story","Make someone agree with you","Draw a picture","Take a nap"],"answer":1},{"q":"A \"fact\" is something that:","choices":["Is true","Is your idea","Is a feeling","Is a question"],"answer":0},{"q":"An \"opinion\" is:","choices":["A true thing everyone agrees on","What YOU think or feel","A number","A color"],"answer":1},{"q":"\"Tulsa is in Oklahoma\" is a:","choices":["Fact","Opinion","Question","Joke"],"answer":0},{"q":"\"Pizza is the best food\" is a:","choices":["Fact","Opinion","Math problem","Question"],"answer":1},{"q":"A personal narrative is a story about:","choices":["A famous person","YOU and your life","Made-up people","A robot"],"answer":1},{"q":"Sensory details are about your:","choices":["Numbers","5 senses (see, hear, smell, taste, touch)","Schedule","Locker"],"answer":1},{"q":"\"Evidence\" means:","choices":["Facts that prove your point","A funny joke","The title","A song"],"answer":0},{"q":"The \"hook\" in a story is:","choices":["The end","The exciting start that grabs you","The middle","The page number"],"answer":1}],"matching":{"instructions":"Tap a word on the left, then tap its match on the right.","pairs":[{"term":"Simile","def":"Compare with \"like\" or \"as\""},{"term":"Metaphor","def":"Compare WITHOUT \"like\" or \"as\""},{"term":"Alliteration","def":"Words start with the same sound"},{"term":"Fact","def":"Something that is true"}]},"reflection":{"prompt":"Write 1-2 sentences. What is one thing you learned about writing this semester? Sentence starter: \"One thing I learned is...\"","placeholder":"One thing I learned is..."},"studentName":"Elsa"};
+const state = {
+  mcAnswers: new Array(DATA.mc.length).fill(null),
+  matchPairs: {},
+  selectedTerm: null,
+  reflection: ""
+};
+let pairColorIndex = 0;
+
+function renderMC() {
+  const container = document.getElementById('mcContainer');
+  container.innerHTML = '';
+  DATA.mc.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    let html = '<div class="question-text"><span class="question-number">' + (i+1) + '</span>' + escapeHtml(item.q) + '</div>';
+    html += '<div class="choices">';
+    item.choices.forEach((choice, ci) => {
+      html += '<button class="choice" data-q="' + i + '" data-c="' + ci + '" onclick="pickMC(' + i + ',' + ci + ')">' + escapeHtml(choice) + '</button>';
+    });
+    html += '</div><div class="feedback" id="fb-' + i + '"></div>';
+    card.innerHTML = html;
+    container.appendChild(card);
+  });
+}
+
+function pickMC(qi, ci) {
+  state.mcAnswers[qi] = ci;
+  // Reset all choice styles for this question
+  document.querySelectorAll('[data-q="' + qi + '"]').forEach(b => {
+    b.classList.remove('selected', 'correct', 'incorrect');
+    b.disabled = false;
+  });
+  const correct = DATA.mc[qi].answer === ci;
+  const clicked = document.querySelector('[data-q="' + qi + '"][data-c="' + ci + '"]');
+  if (correct) {
+    clicked.classList.add('correct');
+  } else {
+    clicked.classList.add('incorrect');
+    // also highlight the right answer
+    const rightBtn = document.querySelector('[data-q="' + qi + '"][data-c="' + DATA.mc[qi].answer + '"]');
+    if (rightBtn) rightBtn.classList.add('correct');
+  }
+  // Disable all after pick
+  document.querySelectorAll('[data-q="' + qi + '"]').forEach(b => b.disabled = true);
+  // Feedback message
+  const fb = document.getElementById('fb-' + qi);
+  fb.className = 'feedback show ' + (correct ? 'correct' : 'incorrect');
+  fb.textContent = correct ? '✓ Correct! Nice work.' : '✗ Not quite. The correct answer is highlighted in green.';
+  updateProgress();
+}
+
+function renderMatching() {
+  document.getElementById('matchInstructions').textContent = DATA.matching.instructions;
+  const termsCol = document.getElementById('termsCol');
+  const defsCol = document.getElementById('defsCol');
+  termsCol.innerHTML = '';
+  defsCol.innerHTML = '';
+
+  // Shuffle defs for matching challenge
+  const shuffledDefs = DATA.matching.pairs.map((p, i) => ({ ...p, originalIndex: i }))
+    .sort(() => Math.random() - 0.5);
+
+  DATA.matching.pairs.forEach((pair, i) => {
+    const t = document.createElement('div');
+    t.className = 'match-item';
+    t.dataset.termIndex = i;
+    t.textContent = pair.term;
+    t.onclick = () => selectTerm(i);
+    termsCol.appendChild(t);
+  });
+  shuffledDefs.forEach((pair) => {
+    const d = document.createElement('div');
+    d.className = 'match-item';
+    d.dataset.defIndex = pair.originalIndex;
+    d.textContent = pair.def;
+    d.onclick = () => selectDef(pair.originalIndex);
+    defsCol.appendChild(d);
+  });
+}
+
+function selectTerm(i) {
+  if (state.matchPairs[i] !== undefined) return;
+  // Clear other selections in terms col
+  document.querySelectorAll('[data-term-index]').forEach(el => el.classList.remove('selected'));
+  document.querySelector('[data-term-index="' + i + '"]').classList.add('selected');
+  state.selectedTerm = i;
+}
+
+function selectDef(i) {
+  if (Object.values(state.matchPairs).includes(i)) return;
+  if (state.selectedTerm === null) return;
+  state.matchPairs[state.selectedTerm] = i;
+  const tEl = document.querySelector('[data-term-index="' + state.selectedTerm + '"]');
+  const dEl = document.querySelector('[data-def-index="' + i + '"]');
+  tEl.classList.remove('selected');
+  tEl.classList.add('matched');
+  tEl.dataset.pairColor = pairColorIndex % 4;
+  dEl.classList.add('matched');
+  dEl.dataset.pairColor = pairColorIndex % 4;
+  pairColorIndex++;
+  state.selectedTerm = null;
+  updateProgress();
+}
+
+function updateProgress() {
+  const totalAnswered = state.mcAnswers.filter(a => a !== null).length
+    + Object.keys(state.matchPairs).length
+    + (state.reflection.trim().length > 0 ? 1 : 0);
+  const total = DATA.mc.length + DATA.matching.pairs.length + 1;
+  const pct = (totalAnswered / total) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+function submitAll() {
+  state.reflection = document.getElementById('reflectionInput').value;
+  // Score MC
+  let mcCorrect = 0;
+  DATA.mc.forEach((item, i) => {
+    if (state.mcAnswers[i] === item.answer) mcCorrect++;
+  });
+  // Score matching
+  let matchCorrect = 0;
+  Object.entries(state.matchPairs).forEach(([t, d]) => {
+    const tEl = document.querySelector('[data-term-index="' + t + '"]');
+    const dEl = document.querySelector('[data-def-index="' + d + '"]');
+    if (Number(t) === Number(d)) {
+      matchCorrect++;
+      tEl.classList.add('correct');
+      dEl.classList.add('correct');
+    } else {
+      tEl.classList.add('incorrect');
+      dEl.classList.add('incorrect');
+    }
+  });
+  const reflectionPoint = state.reflection.trim().length >= 10 ? 1 : 0;
+  const total = mcCorrect + matchCorrect + reflectionPoint;
+  const max = DATA.mc.length + DATA.matching.pairs.length + 1;
+  document.getElementById('scoreDisplay').textContent = total + ' / ' + max;
+  document.getElementById('scoreDetail').textContent =
+    'Multiple Choice: ' + mcCorrect + '/' + DATA.mc.length +
+    '  ·  Matching: ' + matchCorrect + '/' + DATA.matching.pairs.length +
+    '  ·  Reflection: ' + reflectionPoint + '/1';
+  document.getElementById('resultsBanner').classList.add('show');
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('reflectionInput').disabled = true;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetAll() {
+  state.mcAnswers = new Array(DATA.mc.length).fill(null);
+  state.matchPairs = {};
+  state.selectedTerm = null;
+  state.reflection = "";
+  pairColorIndex = 0;
+  document.getElementById('reflectionInput').value = '';
+  document.getElementById('reflectionInput').disabled = false;
+  document.getElementById('submitBtn').disabled = false;
+  document.getElementById('resultsBanner').classList.remove('show');
+  document.querySelectorAll('.feedback').forEach(f => f.classList.remove('show'));
+  renderMC();
+  renderMatching();
+  updateProgress();
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[c]);
+}
+
+// Init
+renderMC();
+renderMatching();
+document.getElementById('reflectPrompt').textContent = DATA.reflection.prompt;
+document.getElementById('reflectionInput').placeholder = DATA.reflection.placeholder;
+document.getElementById('reflectionInput').addEventListener('input', (e) => {
+  state.reflection = e.target.value;
+  updateProgress();
+});
+</script>
+</body>
+</html>
